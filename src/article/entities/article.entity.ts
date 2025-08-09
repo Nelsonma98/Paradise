@@ -8,11 +8,14 @@ export class Article {
   @Column()
   name: string;
 
-  @Column()
-  description: string;
+  @Column({nullable: true})
+  description?: string;
 
   @Column()
   price: number;
+
+  @Column()
+  size: string;
 
   @Column()
   image: string;

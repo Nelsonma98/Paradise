@@ -17,22 +17,39 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { storage } from 'src/config/multer.config';
 import { AuthGuard } from 'src/auth/guard/auth.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 
 @Controller('article')
 @ApiBearerAuth('access-token')
+@ApiTags('Articles')
+@ApiExtraModels(CreateArticleDto)
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @Post()
+  @ApiOperation({summary: 'Crear una imagen'})
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema:{
+      allOf: [
+        {$ref: getSchemaPath(CreateArticleDto)},
+        {
+          type: 'object',
+          properties: {
+            image: {type: 'string', format: 'binary'},
+          },
+          required: ['image']
+        }
+      ]
+    }
+  })
   @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('image', { storage }))
   create(
     @Body() createArticleDto: CreateArticleDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    createArticleDto.image = image.filename;
-    return this.articleService.create(createArticleDto);
+    return this.articleService.create(createArticleDto, image.filename);
   }
 
   @Get()
@@ -45,17 +62,17 @@ export class ArticleController {
     return this.articleService.findOne(id);
   }
 
-  @Patch(':id')
-  @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('image', { storage }))
-  update(
-    @Param('id') id: string,
-    @Body() updateArticleDto: UpdateArticleDto,
-    @UploadedFile() image: Express.Multer.File,
-  ) {
-    updateArticleDto.image = image.filename;
-    return this.articleService.update(id, updateArticleDto);
-  }
+  // @Patch(':id')
+  // @UseGuards(AuthGuard)
+  // @UseInterceptors(FileInterceptor('image', { storage }))
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateArticleDto: UpdateArticleDto,
+  //   @UploadedFile() image: Express.Multer.File,
+  // ) {
+  //   updateArticleDto.image = image.filename;
+  //   return this.articleService.update(id, updateArticleDto);
+  // }
 
   @Delete(':id')
   @UseGuards(AuthGuard)

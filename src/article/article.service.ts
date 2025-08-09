@@ -13,9 +13,10 @@ export class ArticleService {
     private readonly articleRepository: Repository<Article>,
   ) {}
 
-  async create(createArticleDto: CreateArticleDto) {
+  async create(createArticleDto: CreateArticleDto, image: string) {
     const article = this.articleRepository.create({
       ...createArticleDto,
+      image,
     });
     return await this.articleRepository.save(article);
   }
@@ -28,22 +29,22 @@ export class ArticleService {
     return await this.articleRepository.findOneBy({ id });
   }
 
-  async update(id: string, updateArticleDto: UpdateArticleDto) {
-    try {
-      const oldArt = await this.findOne(id);
-      if (!oldArt) {
-        throw new BadRequestException('Article not found');
-      }
-      await deleteFile(oldArt.image);
-      const article = {
-        ...updateArticleDto,
-      };
-      return await this.articleRepository.update(id, article);
-    } catch (error) {
-      error.status = 500;
-      throw error;
-    }
-  }
+  // async update(id: string, updateArticleDto: UpdateArticleDto) {
+  //   try {
+  //     const oldArt = await this.findOne(id);
+  //     if (!oldArt) {
+  //       throw new BadRequestException('Article not found');
+  //     }
+  //     await deleteFile(oldArt.image);
+  //     const article = {
+  //       ...updateArticleDto,
+  //     };
+  //     return await this.articleRepository.update(id, article);
+  //   } catch (error) {
+  //     error.status = 500;
+  //     throw error;
+  //   }
+  // }
 
   async remove(id: string) {
     try {
